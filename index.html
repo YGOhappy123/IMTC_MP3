@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>My Music Player</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+            integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
+            crossorigin="anonymous"
+        />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="icon"
+            href="https://images-eu.ssl-images-amazon.com/images/I/51a1NKExrxL.png"
+            type="image/x-icon"
+        />
+        <link rel="stylesheet" href="./assets/mp3.css" />
+    </head>
+
+    <body>
+        <!-- Logo ITMC -->
+        <div class="itmc-logo">
+            <img src="./assets/imgs/LOGO_ITMC.png" alt="" srcset="" />
+        </div>
+
+        <!-- Playing: player--playing -->
+        <div class="player">
+            <!-- Dashboard -->
+            <div class="dashboard">
+                <!-- Header -->
+                <header>
+                    <h4>Current Song:</h4>
+                    <h2></h2>
+                </header>
+
+                <!-- CD -->
+                <div class="cd">
+                    <div
+                        class="cd-thumb"
+                        style="
+                            background-image: url('https://w7.pngwing.com/pngs/137/327/png-transparent-computer-icons-music-music-visualization-music-video-others-angle-music-video-media-player-thumbnail.png');
+                        "
+                    ></div>
+                </div>
+
+                <!-- Control -->
+                <div class="control">
+                    <div class="btn btn-repeat">
+                        <i class="fas fa-redo"></i>
+                    </div>
+                    <div class="btn btn-prev">
+                        <i class="fas fa-step-backward"></i>
+                    </div>
+                    <div class="btn btn-toggle-play">
+                        <i class="fas fa-pause icon-pause"></i>
+                        <i class="fas fa-play icon-play"></i>
+                    </div>
+                    <div class="btn btn-next">
+                        <i class="fas fa-step-forward"></i>
+                    </div>
+                    <div class="btn btn-random">
+                        <i class="fas fa-random"></i>
+                    </div>
+                </div>
+
+                <input
+                    id="progress"
+                    class="progress"
+                    type="range"
+                    value="0"
+                    step="1"
+                    min="0"
+                    max="100"
+                />
+
+                <div class="volume-wrap">
+                    <i
+                        class="volume-icon volume-icon--mute fas fa-volume-mute"
+                    ></i>
+                    <i
+                        class="volume-icon volume-icon--small fas fa-volume-down"
+                    ></i>
+                    <i
+                        class="volume-icon volume-icon--big fas fa-volume-up"
+                    ></i>
+                    <input
+                        id="volume"
+                        class="volume-range"
+                        type="range"
+                        value="40"
+                        step="1"
+                        min="0"
+                        max="100"
+                    />
+                    <div class="volume-value-wrap">
+                        <span class="volume-value"></span>
+                    </div>
+                </div>
+
+                <div class="theme-color-picker">
+                    <div class="theme-color-label">Choose your theme !</div>
+                    <div class="theme-color-input-frame">
+                        <input
+                            type="color"
+                            class="theme-color-input"
+                            value=""
+                        />
+                    </div>
+                    <button class="theme-color-reset-btn">Reset Theme</button>
+                </div>
+
+                <audio id="audio" src=""></audio>
+            </div>
+
+            <!-- Playlist -->
+            <div class="playlist"></div>
+        </div>
+
+        <script>
+            const $ = document.querySelector.bind(document)
+            const $$ = document.querySelectorAll.bind(document)
+            const root = document.documentElement
+
+            const mainPlayer = $('.player')
+            const mainHeading = $('header h2')
+            const cdThumbnail = $('.cd-thumb')
+            const audio = $('#audio')
+            const playBtn = $('.btn-toggle-play')
+            const cd = $('.cd')
+            const progress = $('#progress')
+            const volume = $('.volume-range')
+            const nextBtn = $('.btn-next')
+            const previousBtn = $('.btn-prev')
+            const repeatBtn = $('.btn-repeat')
+            const randomBtn = $('.btn-random')
+            const playList = $('.playlist')
+            const themeColorInput = $('.theme-color-input')
+            const themeColorResetBtn = $('.theme-color-reset-btn')
+
+            const MP3 = {
+                currentIndex: 0,
+
+                isPlaying: false,
+                isRepeat: false,
+                isRandom: false,
+
+                songs: [
+                    {
+                        name: 'Pretty Girl',
+                        singer: 'Maggie Lindemann',
+                        path: './assets/songs/Pretty Girl.mp3',
+                        image: './assets/imgs/Pretty Girl.jpg'
+                    },
+                    {
+                        name: 'Counting Stars',
+                        singer: 'One Republic',
+                        path: './assets/songs/Counting Stars.mp3',
+                        image: './assets/imgs/Counting Stars.jpg'
+                    },
+                    {
+                        name: 'Sweet But Psycho',
+                        singer: 'Ava Max',
+                        path: './assets/songs/Sweet But Psycho.mp3',
+                        image: './assets/imgs/Sweet But Psycho.png'
+                    },
+                    {
+                        name: 'That Girl',
+                        singer: 'Olly Murs',
+                        path: './assets/songs/That Girl.mp3',
+                        image: './assets/imgs/That Girl.jpg'
+                    },
+                    {
+                        name: 'Build A Bitch',
+                        singer: 'Bella Poarch',
+                        path: './assets/songs/Build A Bitch.mp3',
+                        image: './assets/imgs/Build A Bitch.jpg'
+                    },
+                    {
+                        name: 'Animals',
+                        singer: 'Maroon 5',
+                        path: './assets/songs/Animals.mp3',
+                        image: './assets/imgs/Animals.jpg'
+                    },
+                    {
+                        name: "I'm A Mess",
+                        singer: 'Bebe Rexha',
+                        path: './assets/songs/I_m A Mess.mp3',
+                        image: './assets/imgs/I_m A Mess.jpg'
+                    },
+                    {
+                        name: 'Faded',
+                        singer: 'Alan Walker',
+                        path: './assets/songs/Faded.mp3',
+                        image: './assets/imgs/Faded.jpg'
+                    },
+                    {
+                        name: 'Fly Away',
+                        singer: 'TheFatRat',
+                        path: './assets/songs/Fly Away.mp3',
+                        image: './assets/imgs/Fly Away.jpg'
+                    },
+                    {
+                        name: 'Shape Of You',
+                        singer: 'Ed Sheeran',
+                        path: './assets/songs/Shape Of You.mp3',
+                        image: './assets/imgs/Shape Of You.jpg'
+                    },
+                    {
+                        name: 'Senorita',
+                        singer: 'Shawn Mendes, Camila Cabello',
+                        path: './assets/songs/Senorita.mp3',
+                        image: './assets/imgs/Senorita.jpg'
+                    },
+                    {
+                        name: 'Lemon Tree',
+                        singer: "Fool's Garden",
+                        path: './assets/songs/Lemon Tree.mp3',
+                        image: './assets/imgs/Lemon Tree.jpg'
+                    }
+                ],
+
+                renderSongs: function () {
+                    const htmls = this.songs.map((song, index) => {
+                        return `
+          <div data-index="${index}" class="song ${
+                            index === MP3.currentIndex ? 'active' : ''
+                        }">
+            <div class="thumb" 
+              style="background-image: url('${song.image}')">
+            </div>
+            <div class="body">
+              <h3 class="title">${song.name}</h3>
+              <p class="author">${song.singer}</p>
+            </div>
+            <div class="option">
+              <i class="fas fa-ellipsis-h"></i>
+            </div>
+          </div> `
+                    })
+                    playList.innerHTML = htmls.join('')
+                },
+
+                handleDomEvents: function () {
+                    // Downsize the cd-thumb on vertical scroll
+                    const primaryCdWidth = cd.offsetWidth
+                    document.onscroll = function () {
+                        const scrollTop =
+                            document.documentElement.scrollTop || window.scrollY
+                        const newCdWidth = primaryCdWidth - scrollTop
+
+                        cd.style.width = newCdWidth > 0 ? newCdWidth + 'px' : 0
+                        cd.style.opacity = newCdWidth / primaryCdWidth
+                    }
+
+                    // Rotation of the cd thumb, the default status is paused
+                    const cdThumbRotation = cdThumbnail.animate(
+                        [{ transform: 'rotate(360deg)' }],
+                        {
+                            duration: 8000,
+                            iterations: Infinity
+                        }
+                    )
+                    cdThumbRotation.pause()
+
+                    // Play / pause the song when click the play button
+                    playBtn.onclick = function () {
+                        MP3.isPlaying == true ? audio.pause() : audio.play()
+                    }
+
+                    audio.onplay = function () {
+                        mainPlayer.classList.add('player--playing')
+                        MP3.isPlaying = true
+                        cdThumbRotation.play()
+                    }
+
+                    audio.onpause = function () {
+                        mainPlayer.classList.remove('player--playing')
+                        MP3.isPlaying = false
+                        cdThumbRotation.pause()
+                    }
+
+                    // Change the position of the slider according to the current time
+                    audio.ontimeupdate = function () {
+                        if (audio.duration) {
+                            const progressPercentage = Math.floor(
+                                (audio.currentTime / audio.duration) * 100
+                            )
+                            progress.value = progressPercentage
+                            progress.style.background = `linear-gradient(90deg, var(--primary-color) ${progress.value}%, #d3d3d3 ${progress.value}%)`
+                        }
+                    }
+
+                    // Fast forward / backward the song
+                    progress.oninput = function (e) {
+                        const seekTime = (audio.duration * e.target.value) / 100
+                        audio.currentTime = seekTime
+                    }
+
+                    // Handle next / previous button events
+                    nextBtn.onclick = function () {
+                        if (MP3.isRandom) {
+                            MP3.randomSong()
+                        } else {
+                            MP3.nextSong()
+                        }
+                        MP3.renderSongs()
+                        MP3.scrollToActiveSong()
+                        audio.play()
+                    }
+
+                    previousBtn.onclick = function () {
+                        if (MP3.isRandom) {
+                            MP3.randomSong()
+                        } else {
+                            MP3.previousSong()
+                        }
+                        MP3.renderSongs()
+                        MP3.scrollToActiveSong()
+                        audio.play()
+                    }
+
+                    // On / off the repeat button
+                    repeatBtn.onclick = function () {
+                        MP3.isRepeat = !MP3.isRepeat
+                        repeatBtn.classList.toggle('active')
+                    }
+
+                    // On / off the random button
+                    randomBtn.onclick = function () {
+                        MP3.isRandom = !MP3.isRandom
+                        randomBtn.classList.toggle('active')
+                    }
+
+                    // Handle audio end event
+                    audio.onended = function () {
+                        if (MP3.isRepeat) {
+                            audio.play()
+                        } else {
+                            nextBtn.click()
+                        }
+                    }
+
+                    // Set background for the range, show the suitable icon and the value of the volume
+                    const volumeValue = $('.volume-value')
+                    audio.volume = 0.4
+                    $('.volume-icon--small').style.display = 'initial'
+                    volumeValue.innerText = volume.value + ' %'
+                    volume.oninput = function () {
+                        $('.volume-icon--mute').style.display = 'none'
+                        $('.volume-icon--small').style.display = 'none'
+                        $('.volume-icon--big').style.display = 'none'
+                        switch (true) {
+                            case this.value == 0:
+                                $('.volume-icon--mute').style.display =
+                                    'initial'
+                                break
+                            case this.value > 0 && this.value <= 50:
+                                $('.volume-icon--small').style.display =
+                                    'initial'
+                                break
+                            default:
+                                $('.volume-icon--big').style.display = 'initial'
+                        }
+                        const newAudioVolume = this.value / 100
+                        volume.style.background = `linear-gradient(90deg, var(--primary-color) ${volume.value}%, #d3d3d3 ${volume.value}%)`
+                        volumeValue.innerText = this.value + ' %'
+                        audio.volume = newAudioVolume
+                    }
+
+                    // Change song by directly click on it
+                    playList.onclick = function (e) {
+                        const songNode = e.target.closest('.song:not(.active)')
+                        if (!e.target.closest('.option')) {
+                            if (songNode) {
+                                MP3.currentIndex = Number(
+                                    songNode.dataset.index
+                                )
+                                MP3.renderSongs()
+                                MP3.loadCurrentSong()
+                                MP3.scrollToActiveSong()
+                                audio.play()
+                            }
+                        }
+                    }
+
+                    // Change theme color
+                    const PRIMARY_COLOR = '#ec1f55'
+
+                    root.style.setProperty('--primary-color', PRIMARY_COLOR)
+                    themeColorInput.value = PRIMARY_COLOR
+
+                    themeColorInput.oninput = function () {
+                        root.style.setProperty(
+                            '--primary-color',
+                            themeColorInput.value
+                        )
+                    }
+                    themeColorResetBtn.onclick = function () {
+                        root.style.setProperty('--primary-color', PRIMARY_COLOR)
+                        themeColorInput.value = PRIMARY_COLOR
+                    }
+                },
+
+                defineProperties: function () {
+                    Object.defineProperty(this, 'currentSong', {
+                        get: function () {
+                            return this.songs[this.currentIndex]
+                        }
+                    })
+                },
+
+                loadCurrentSong: function () {
+                    mainHeading.innerText = this.currentSong.name
+                    cdThumbnail.style.backgroundImage = `url('${this.currentSong.image}')`
+                    audio.src = this.currentSong.path
+                },
+
+                nextSong: function () {
+                    this.currentIndex++
+                    if (this.currentIndex >= this.songs.length) {
+                        this.currentIndex = 0
+                    }
+                    this.loadCurrentSong()
+                },
+
+                previousSong: function () {
+                    this.currentIndex--
+                    const maximumIndex = this.songs.length - 1
+                    if (this.currentIndex < 0) {
+                        this.currentIndex = maximumIndex
+                    }
+                    this.loadCurrentSong()
+                },
+
+                randomSong: function () {
+                    let newIndex
+                    do {
+                        newIndex = Math.floor(Math.random() * this.songs.length)
+                    } while (newIndex === this.currentIndex)
+
+                    this.currentIndex = newIndex
+                    this.loadCurrentSong()
+                },
+
+                scrollToActiveSong: function () {
+                    setTimeout(() => {
+                        $('.song.active').scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        })
+                    }, 400)
+                },
+
+                start: function () {
+                    this.defineProperties()
+
+                    this.handleDomEvents()
+
+                    this.loadCurrentSong()
+
+                    this.renderSongs()
+                }
+            }
+            MP3.start()
+        </script>
+    </body>
+</html>
